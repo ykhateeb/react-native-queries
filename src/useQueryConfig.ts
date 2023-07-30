@@ -13,24 +13,44 @@ export const useQueryConfig = (
   baseURLKey: string,
   urlKey?: string,
   contextId?: string
-): [QueryConfig, (data: Partial<BaseURLConfig>) => void] => {
+): [QueryConfig, (nextConfig: Partial<BaseURLConfig | URLConfig>) => void] => {
   const { config, setConfig } = React.useContext(getContext(contextId))!;
   const baseURLConfig = config[baseURLKey]!;
 
   const setQueryConfig = useCallback(
-    (data: Partial<BaseURLConfig>) => {
+    (nextConfig: Partial<BaseURLConfig | URLConfig>) => {
       setConfig((prevConfig) => {
         const prevBaseURLConfig = prevConfig?.[baseURLKey];
+        const prevURLConfig = urlKey
+          ? prevBaseURLConfig?.[urlKey as keyof typeof prevBaseURLConfig]
+          : undefined;
 
-        const updatedConfig = {
-          ...prevConfig,
-          [baseURLKey]: _.merge(prevBaseURLConfig, data),
-        };
+        //Update base URL config
+        if (!prevURLConfig) {
+          return {
+            ...prevConfig,
+            [baseURLKey]: _.merge(prevBaseURLConfig, nextConfig),
+          };
+        }
 
-        return updatedConfig;
+        //Update URL config
+        if (typeof prevURLConfig === 'object') {
+          return {
+            ...prevConfig,
+            [baseURLKey]: {
+              ...prevBaseURLConfig,
+              [urlKey!]: _.merge(prevURLConfig, nextConfig),
+            },
+          };
+        } else {
+          console.error(
+            `${urlKey} config is not an object to be able to update it.`
+          );
+          return prevConfig;
+        }
       });
     },
-    [baseURLKey, setConfig]
+    [baseURLKey, urlKey, setConfig]
   );
 
   const getURL = () => {
@@ -52,11 +72,7 @@ export const useQueryConfig = (
   const getRequestConfig = () => {
     let urlConfig = baseURLConfig[(urlKey as keyof typeof baseURLConfig) || ''];
 
-    if (!urlConfig) {
-      return undefined;
-    }
-
-    if (typeof urlConfig === 'string') {
+    if (!urlConfig || typeof urlConfig === 'string') {
       return baseURLConfig?.requestConfig;
     }
 
