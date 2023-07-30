@@ -46,6 +46,7 @@ export const useQueryConfig = (
           console.error(
             `${urlKey} config is not an object to be able to update it.`
           );
+
           return prevConfig;
         }
       });
