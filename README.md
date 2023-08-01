@@ -1,9 +1,9 @@
 # react-native-queries
 
-![npm](https://img.shields.io/npm/v/react-native-queries?link=https%3A%2F%2Fwww.npmjs.com%2Fpackage%2Freact-native-queries)
-![npm](https://img.shields.io/npm/dw/react-native-queries)
+[![npm](https://img.shields.io/npm/v/react-native-queries?link=https%3A%2F%2Fwww.npmjs.com%2Fpackage%2Freact-native-queries)](https://www.npmjs.com/package/react-native-queries)
+[![npm](https://img.shields.io/npm/dw/react-native-queries)](https://www.npmjs.com/package/react-native-queries)
 ![GitHub](https://img.shields.io/github/license/ykhateeb/react-native-queries)
-![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/ykhateeb/react-native-queries/ci.yml)
+[![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/ykhateeb/react-native-queries/ci.yml)](https://github.com/ykhateeb/react-native-queries/actions/workflows/ci.yml)
 
 Simple and efficient library that empowers you to effortlessly handle HTTP requests in your React/React Native applications. It leverages the power of the widely-used [react-query](https://github.com/TanStack/query) and [axios](https://github.com/axios/axios) libraries, providing a robust set of hooks that streamline the process of fetching and managing data in your application.
 
