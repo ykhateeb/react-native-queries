@@ -36,6 +36,7 @@
     "bootstrap": "yarn example && yarn install"
   },
   "keywords": [
+    "react",
     "react-native",
     "ios",
     "android"
