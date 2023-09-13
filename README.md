@@ -546,7 +546,7 @@ export default function App() {
 
 ### `config`
 
-Start by adding `QueriesProvider` to your root app and set `config` properties with the following structure:
+Main configuration object that represents the structure of queries, start by adding `QueriesProvider` to your root app and pass `config` object with the following structure:
 
 ```javascript
 /**
@@ -654,7 +654,7 @@ interface Config {
 
 ### `useQueryConfig`
 
-To get and update query config.
+Hook to get and update query config.
 
 ```javascript
 const [queryConfig, setQueryConfig] = useQueryConfig('baseURLKey', 'URLKey');
