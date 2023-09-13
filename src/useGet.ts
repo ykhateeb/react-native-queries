@@ -4,9 +4,9 @@ import Axios from './Axios';
 import type { QueryConfig } from './types';
 
 export interface UseGetOptions<TData, TError>
-  extends UseQueryOptions<TData, TError> {}
+  extends Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'> {}
 
-interface UseGetConfig extends QueryConfig {
+export interface UseGetConfig extends QueryConfig {
   key: QueryKey;
 }
 

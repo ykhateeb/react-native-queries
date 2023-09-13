@@ -1,17 +1,22 @@
 import React from 'react';
-import type { ContextState } from './types';
+import type { ContextState, QueryConfig } from './types';
 
-export const parseURL = (
-  url: string,
-  data: {
-    [key: string]: string | number;
-  }
-): string => {
-  Object.keys(data).forEach((key) => {
-    url = url.replace(`{{${key}}}`, `${data[key]}`);
+type Params = {
+  [key: string]: string | number;
+};
+export const parseURL = (url: string, params: Params): string => {
+  Object.keys(params).forEach((key) => {
+    url = url.replace(`{{${key}}}`, `${params[key]}`);
   });
 
   return url;
+};
+
+export const parseConfigURL = (queryConfig: QueryConfig, params: Params) => {
+  return {
+    ...queryConfig,
+    url: parseURL(queryConfig.url, params),
+  };
 };
 
 export const replaceAt = (

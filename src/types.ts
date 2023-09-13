@@ -3,7 +3,7 @@ import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 type BaseURL = { baseURL: string };
 type URL = { url: string };
 export type RequestConfig = {
-  requestConfig?: Omit<AxiosRequestConfig, 'baseURL' | 'url'>;
+  requestConfig?: Omit<AxiosRequestConfig, 'baseURL' | 'url' | 'params'>;
 };
 export type RequestConfigAction = {
   requestConfigAction?: 'MERGE' | 'OVERWRITE';
@@ -42,7 +42,7 @@ export type Config = Record<string, BaseURLConfig>;
  */
 export type QueryConfig = BaseURL & URL & RequestConfig;
 
-export type { AxiosInstance, AxiosRequestConfig };
+export type { AxiosInstance };
 
 /**
  * The state of the context.

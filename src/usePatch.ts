@@ -3,19 +3,19 @@ import type { UseMutationOptions } from 'react-query';
 import Axios from './Axios';
 import type { QueryConfig } from './types';
 
-export interface UsePutOptions<TData, TError, TVariables>
+export interface UsePatchOptions<TData, TError, TVariables>
   extends Omit<UseMutationOptions<TData, TError, TVariables>, 'mutationFn'> {}
 
-export interface UsePutConfig extends QueryConfig {}
+export interface UsePatchConfig extends QueryConfig {}
 
-export const usePut = <TData = void, TError = void, TVariables = void>(
-  config: UsePutConfig,
-  options?: UsePutOptions<TData, TError, TVariables>
+export const usePatch = <TData = void, TError = void, TVariables = void>(
+  config: UsePatchConfig,
+  options?: UsePatchOptions<TData, TError, TVariables>
 ) => {
   const result = useMutation<TData, TError, TVariables>(async (data) => {
     const axiosInstance = Axios.getInstance(config.baseURL);
 
-    const response = await axiosInstance.put<TData>(
+    const response = await axiosInstance.patch<TData>(
       config.url,
       data,
       config.requestConfig

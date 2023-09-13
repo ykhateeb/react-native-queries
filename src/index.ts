@@ -5,4 +5,5 @@ export * from './useQueryConfig';
 export * from './useGet';
 export * from './usePost';
 export * from './usePut';
+export * from './usePatch';
 export * from './useDelete';
