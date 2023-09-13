@@ -4,9 +4,9 @@ import Axios from './Axios';
 import type { QueryConfig } from './types';
 
 export interface UsePostOptions<TData, TError, TVariables>
-  extends UseMutationOptions<TData, TError, TVariables> {}
+  extends Omit<UseMutationOptions<TData, TError, TVariables>, 'mutationFn'> {}
 
-interface UsePostConfig extends QueryConfig {}
+export interface UsePostConfig extends QueryConfig {}
 
 export const usePost = <TData = void, TError = void, TVariables = void>(
   config: UsePostConfig,

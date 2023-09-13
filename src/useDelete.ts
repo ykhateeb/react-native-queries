@@ -1,27 +1,30 @@
 import { useMutation } from 'react-query';
-import type { UseMutationOptions } from 'react-query';
 import Axios from './Axios';
+import { parseURL } from './utils';
+import type { UseMutationOptions } from 'react-query';
 import type { QueryConfig } from './types';
 
 export interface UseDeleteOptions<TData, TError, TVariables>
-  extends UseMutationOptions<TData, TError, TVariables> {}
+  extends Omit<UseMutationOptions<TData, TError, TVariables>, 'mutationFn'> {}
 
-interface UseDeleteConfig extends QueryConfig {}
+export interface UseDeleteConfig extends QueryConfig {}
 
 export const useDelete = <TData = void, TError = void, TVariables = void>(
   config: UseDeleteConfig,
   options?: UseDeleteOptions<TData, TError, TVariables>
 ) => {
-  const result = useMutation<TData, TError, TVariables>(async (_data) => {
-    const axiosInstance = Axios.getInstance(config.baseURL);
+  const result = useMutation<TData, TError, TVariables>(
+    async (data /** path params */) => {
+      const axiosInstance = Axios.getInstance(config.baseURL);
+      const response = await axiosInstance.delete<TData>(
+        parseURL(config.url, (data || {}) as any),
+        config.requestConfig
+      );
 
-    const response = await axiosInstance.delete<TData>(
-      config.url,
-      config.requestConfig
-    );
-
-    return response.data;
-  }, options);
+      return response.data;
+    },
+    options
+  );
 
   return result;
 };

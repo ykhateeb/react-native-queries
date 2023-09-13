@@ -9,58 +9,90 @@ import type {
 } from './types';
 import _ from 'lodash';
 
-export const useQueryConfig = (
+type URLKeyType = undefined | string | string[];
+
+type ReturnQueryConfig<T> = T extends undefined | string
+  ? QueryConfig
+  : QueryConfig[];
+
+type UpdatedConfig =
+  | Partial<BaseURLConfig | URLConfig>
+  | Partial<BaseURLConfig | URLConfig>[];
+
+export const useQueryConfig = <T extends URLKeyType = undefined>(
   baseURLKey: string,
-  urlKey?: string,
+  URLKey?: T,
   contextId?: string
-): [QueryConfig, (nextConfig: Partial<BaseURLConfig | URLConfig>) => void] => {
+): [ReturnQueryConfig<T>, (updatedConfig: UpdatedConfig) => void] => {
   const { config, setConfig } = React.useContext(getContext(contextId))!;
   const baseURLConfig = config[baseURLKey]!;
 
   const setQueryConfig = useCallback(
-    (nextConfig: Partial<BaseURLConfig | URLConfig>) => {
+    (updatedConfig: UpdatedConfig) => {
       setConfig((prevConfig) => {
-        const prevBaseURLConfig = prevConfig?.[baseURLKey];
-        const prevURLConfig = urlKey
-          ? prevBaseURLConfig?.[urlKey as keyof typeof prevBaseURLConfig]
-          : undefined;
-
-        //Update base URL config
-        if (!prevURLConfig) {
-          return {
-            ...prevConfig,
-            [baseURLKey]: _.merge(prevBaseURLConfig, nextConfig),
-          };
-        }
-
-        //Update URL config
-        if (typeof prevURLConfig === 'object') {
-          return {
-            ...prevConfig,
-            [baseURLKey]: {
-              ...prevBaseURLConfig,
-              [urlKey!]: _.merge(prevURLConfig, nextConfig),
-            },
-          };
-        } else {
-          console.error(
-            `${urlKey} config is not an object to be able to update it.`
-          );
-
+        if (Array.isArray(updatedConfig) && !Array.isArray(URLKey)) {
+          console.error('URLKey must be an array');
           return prevConfig;
         }
+
+        const updateBaseURLConfig = () =>
+          //Update base URL config
+          _.merge(prevConfig, {
+            [baseURLKey]: updatedConfig,
+          });
+
+        const updateURLConfig = (
+          key: string,
+          updatedURLConfig: typeof updatedConfig
+        ) => {
+          const prevURLConfig = _.get(prevConfig, [
+            baseURLKey,
+            key,
+          ]) as URLConfig;
+
+          //Update URL config
+          if (typeof prevURLConfig === 'object') {
+            _.merge(prevConfig, {
+              [baseURLKey]: { [key as string]: updatedURLConfig },
+            });
+          } else {
+            console.error(
+              `${key} config is not an object to be able to update it.`
+            );
+          }
+        };
+
+        if (URLKey) {
+          const keysToUpdate = Array.isArray(URLKey)
+            ? URLKey
+            : [URLKey as string];
+
+          if (Array.isArray(updatedConfig)) {
+            for (let i = 0; i < updatedConfig.length; i++) {
+              updateURLConfig(keysToUpdate[i]!, updatedConfig[i]!);
+            }
+          } else {
+            for (const key of keysToUpdate) {
+              updateURLConfig(key, updatedConfig);
+            }
+          }
+        } else {
+          updateBaseURLConfig();
+        }
+
+        return _.cloneDeep(prevConfig);
       });
     },
-    [baseURLKey, urlKey, setConfig]
+    [baseURLKey, URLKey, setConfig]
   );
 
-  const getURL = () => {
-    if (!urlKey) {
+  const getURL = (key?: string) => {
+    if (!key) {
       return '';
     }
 
     const urlConfig = baseURLConfig[
-      (urlKey as keyof typeof baseURLConfig) || ''
+      (key as keyof typeof baseURLConfig) || ''
     ] as URLConfig;
 
     if (!urlConfig) {
@@ -70,29 +102,49 @@ export const useQueryConfig = (
     return typeof urlConfig === 'string' ? urlConfig : urlConfig.url;
   };
 
-  const getRequestConfig = () => {
-    let urlConfig = baseURLConfig[(urlKey as keyof typeof baseURLConfig) || ''];
+  const getRequestConfig = (key?: string) => {
+    const urlConfig = baseURLConfig[(key as keyof typeof baseURLConfig) || ''];
 
     if (!urlConfig || typeof urlConfig === 'string') {
       return baseURLConfig?.requestConfig;
     }
 
-    switch ((urlConfig as RequestConfigAction).requestConfigAction) {
-      case 'OVERWRITE':
-        return (urlConfig as RequestConfig).requestConfig;
-      default:
-        return _.merge(
-          baseURLConfig.requestConfig,
-          (urlConfig as RequestConfig).requestConfig
-        );
+    const URLRequestConfig = (urlConfig as RequestConfig).requestConfig;
+
+    if (
+      (urlConfig as RequestConfigAction).requestConfigAction === 'OVERWRITE'
+    ) {
+      return URLRequestConfig;
     }
+
+    return _.merge({}, baseURLConfig.requestConfig, URLRequestConfig);
   };
 
-  const queryConfig: QueryConfig = {
-    baseURL: baseURLConfig.baseURL as string,
-    requestConfig: getRequestConfig() as RequestConfig['requestConfig'],
-    url: getURL() as string,
+  const getQueryConfig = () => {
+    if (Array.isArray(URLKey)) {
+      const queriesConfigs: QueryConfig[] = [];
+
+      for (const key of URLKey) {
+        queriesConfigs.push({
+          baseURL: baseURLConfig.baseURL as string,
+          requestConfig: getRequestConfig(
+            key
+          ) as RequestConfig['requestConfig'],
+          url: getURL(key) as string,
+        });
+      }
+
+      return queriesConfigs as ReturnQueryConfig<T>;
+    }
+
+    const queryConfig: QueryConfig = {
+      baseURL: baseURLConfig.baseURL as string,
+      requestConfig: getRequestConfig(URLKey) as RequestConfig['requestConfig'],
+      url: getURL(URLKey) as string,
+    };
+
+    return queryConfig as ReturnQueryConfig<T>;
   };
 
-  return [queryConfig, setQueryConfig];
+  return [getQueryConfig(), setQueryConfig];
 };

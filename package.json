@@ -1,6 +1,6 @@
 {
   "name": "react-native-queries",
-  "version": "0.2.2",
+  "version": "0.3.2",
   "description": "react-native-queries is a powerful library designed to streamline and simplify HTTP requests for React/React Native apps. As a seamless wrapper around the renowned react-query and axios libraries, it empowers you to make HTTP requests effortlessly, saving you valuable development time.",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
@@ -161,6 +161,7 @@
   "dependencies": {
     "axios": "^1.4.0",
     "lodash": "^4.17.21",
+    "react-dom": "^18.2.0",
     "react-query": "^3.39.3"
   }
 }
