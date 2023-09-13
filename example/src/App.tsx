@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect } from 'react';
 import {
   QueriesProvider,
@@ -204,28 +203,28 @@ const useDeleteFakePost = (
 const Content = () => {
   const queryClient = useQueryClient();
 
-  const fakePost = useFakePost(1, {
+  useFakePost(1, {
     onSuccess: (data) => {
-      console.log('fakePost: ', data);
+      console.log('fakePostData: ', data);
     },
   });
 
-  const fakePosts = useFakePosts({
+  useFakePosts({
     onSuccess: (data) => {
-      console.log('fakePosts: ', data);
+      console.log('fakePostsData: ', data);
     },
   });
 
-  const filteredFakePosts = useFilteredFakePosts(1, {
-    onSuccess: (data) => {
-      console.log('filteredFakePosts: ', data);
-    },
-  });
+  const filteredFakePosts = useFilteredFakePosts(1);
+
+  useEffect(() => {
+    console.log('filteredFakePostsData: ', filteredFakePosts.data);
+  }, [filteredFakePosts.data]);
 
   const createFakePost = useCreateFakePost({
     onSuccess: (data) => {
-      console.log('createFakePost: ', data);
-      //refresh fake posts
+      console.log('createFakePostData: ', data);
+      //refresh FilteredFakePosts and FakePosts queries
       queryClient.invalidateQueries({
         queryKey: ['FILTERED_FAKE_POSTS', 'FAKE_POSTS'],
       });
@@ -234,21 +233,21 @@ const Content = () => {
 
   const updateFakePost = useUpdateFakePost(1, {
     onSuccess: (data) => {
-      console.log('updateFakePost: ', data);
-      //refresh single fake post
+      console.log('updateFakePostData: ', data);
+      //refresh FakePost query
       queryClient.invalidateQueries({ queryKey: ['FAKE_POST'] });
     },
   });
 
   const patchFakePost = usePatchFakePost(1, {
     onSuccess: (data) => {
-      console.log('patchFakePost: ', data);
+      console.log('patchFakePostData: ', data);
     },
   });
 
   const deleteFakePost = useDeleteFakePost({
     onSuccess: (data) => {
-      console.log('deleteFakePost: ', data);
+      console.log('deleteFakePostData: ', data);
     },
   });
 

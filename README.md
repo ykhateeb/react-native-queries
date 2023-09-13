@@ -145,28 +145,28 @@ const useDeleteFakePost = (options) => {
 const Content = () => {
   const queryClient = useQueryClient();
 
-  const fakePost = useFakePost(1, {
+  useFakePost(1, {
     onSuccess: (data) => {
-      console.log('fakePost: ', data);
+      console.log('fakePostData: ', data);
     },
   });
 
-  const fakePosts = useFakePosts({
+  useFakePosts({
     onSuccess: (data) => {
-      console.log('fakePosts: ', data);
+      console.log('fakePostsData: ', data);
     },
   });
 
-  const filteredFakePosts = useFilteredFakePosts(1, {
-    onSuccess: (data) => {
-      console.log('filteredFakePosts: ', data);
-    },
-  });
+  const filteredFakePosts = useFilteredFakePosts(1);
+
+  useEffect(() => {
+    console.log('filteredFakePostsData: ', filteredFakePosts.data);
+  }, [filteredFakePosts.data]);
 
   const createFakePost = useCreateFakePost({
     onSuccess: (data) => {
-      console.log('createFakePost: ', data);
-      //refresh fake posts
+      console.log('createFakePostData: ', data);
+      //refresh FilteredFakePosts and FakePosts queries
       queryClient.invalidateQueries({
         queryKey: ['FILTERED_FAKE_POSTS', 'FAKE_POSTS'],
       });
@@ -175,21 +175,21 @@ const Content = () => {
 
   const updateFakePost = useUpdateFakePost(1, {
     onSuccess: (data) => {
-      console.log('updateFakePost: ', data);
-      //refresh single fake post
+      console.log('updateFakePostData: ', data);
+      //refresh FakePost query
       queryClient.invalidateQueries({ queryKey: ['FAKE_POST'] });
     },
   });
 
   const patchFakePost = usePatchFakePost(1, {
     onSuccess: (data) => {
-      console.log('patchFakePost: ', data);
+      console.log('patchFakePostData: ', data);
     },
   });
 
   const deleteFakePost = useDeleteFakePost({
     onSuccess: (data) => {
-      console.log('deleteFakePost: ', data);
+      console.log('deleteFakePostData: ', data);
     },
   });
 
@@ -447,28 +447,28 @@ const useDeleteFakePost = (
 const Content = () => {
   const queryClient = useQueryClient();
 
-  const fakePost = useFakePost(1, {
+  useFakePost(1, {
     onSuccess: (data) => {
-      console.log('fakePost: ', data);
+      console.log('fakePostData: ', data);
     },
   });
 
-  const fakePosts = useFakePosts({
+  useFakePosts({
     onSuccess: (data) => {
-      console.log('fakePosts: ', data);
+      console.log('fakePostsData: ', data);
     },
   });
 
-  const filteredFakePosts = useFilteredFakePosts(1, {
-    onSuccess: (data) => {
-      console.log('filteredFakePosts: ', data);
-    },
-  });
+  const filteredFakePosts = useFilteredFakePosts(1);
+
+  useEffect(() => {
+    console.log('filteredFakePostsData: ', filteredFakePosts.data);
+  }, [filteredFakePosts.data]);
 
   const createFakePost = useCreateFakePost({
     onSuccess: (data) => {
-      console.log('createFakePost: ', data);
-      //refresh fake posts
+      console.log('createFakePostData: ', data);
+      //refresh FilteredFakePosts and FakePosts queries
       queryClient.invalidateQueries({
         queryKey: ['FILTERED_FAKE_POSTS', 'FAKE_POSTS'],
       });
@@ -477,21 +477,21 @@ const Content = () => {
 
   const updateFakePost = useUpdateFakePost(1, {
     onSuccess: (data) => {
-      console.log('updateFakePost: ', data);
-      //refresh single fake post
+      console.log('updateFakePostData: ', data);
+      //refresh FakePost query
       queryClient.invalidateQueries({ queryKey: ['FAKE_POST'] });
     },
   });
 
   const patchFakePost = usePatchFakePost(1, {
     onSuccess: (data) => {
-      console.log('patchFakePost: ', data);
+      console.log('patchFakePostData: ', data);
     },
   });
 
   const deleteFakePost = useDeleteFakePost({
     onSuccess: (data) => {
-      console.log('deleteFakePost: ', data);
+      console.log('deleteFakePostData: ', data);
     },
   });
 
@@ -674,21 +674,17 @@ import React, { useEffect } from 'react';
 import { QueriesProvider, useQueryConfig } from 'react-native-queries';
 
 const Content = () => {
-  //Set requestConfig to all queries
+  //Access shared queries config
   const [jsonplaceholderConfig, setJsonplaceholderConfig] =
     useQueryConfig('jsonplaceholder');
 
-  /**
-   * Set requestConfig to specific query and merge with baseURL requestConfig.
-   * note: to set requestConfig to specific query, url value must be an object in config.
-   * ex: createFakePost:{url: 'posts'}
-   */
+  //Access specific query config
   const [createFakePostConfig, setCreateFakePostConfig] = useQueryConfig(
     'jsonplaceholder',
     'createFakePost'
   );
 
-  //Set requestConfig for multiple queries
+  // Access multiple queries config
   const [multipleFakePostConfig, setMultipleFakePostConfig] = useQueryConfig(
     'jsonplaceholder',
     ['createFakePost', 'patchFakePost']
@@ -696,6 +692,7 @@ const Content = () => {
   // const [createFakePostConfig, patchFakePostConfig] = multipleFakePostConfig;
 
   useEffect(() => {
+    //Set requestConfig to all queries
     setJsonplaceholderConfig({
       requestConfig: {
         headers: {
@@ -704,6 +701,11 @@ const Content = () => {
       },
     });
 
+    /**
+     * Set requestConfig to specific query and merge with baseURL requestConfig.
+     * note: to set requestConfig to specific query, url value must be an object in config.
+     * ex: createFakePost:{url: 'posts'}
+     */
     setCreateFakePostConfig({
       requestConfig: {
         headers: {
@@ -712,7 +714,7 @@ const Content = () => {
       },
     });
 
-    //Form 1:
+    //Form 1: Set requestConfig for multiple queries
     setMultipleFakePostConfig({
       requestConfig: {
         headers: {
