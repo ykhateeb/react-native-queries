@@ -958,7 +958,7 @@ import { useQueryConfig, useInfiniteGet } from 'react-native-queries';
 const infiniteGetConfig = {
   key: '...', // mandatory
   /**
-   * pageSize and pageParam are mandatory, they will be mapped to it's place in url
+   * pageSize and pageParam are mandatory, they will be mapped to their places in url
    * ex: 'posts?_page={{pageParam}}&_limit={{pageSize}}'
    */
   pageSize: '...',
@@ -1031,7 +1031,7 @@ interface InfiniteGetError {}
 const infiniteGetConfig: UseInfiniteGetConfig = {
   key: '...', // mandatory
   /**
-   * pageSize and pageParam are mandatory, they will be mapped to it's place in url
+   * pageSize and pageParam are mandatory, they will be mapped to their places in url
    * ex: 'posts?_page={{pageParam}}&_limit={{pageSize}}'
    */
   pageSize: '...',
