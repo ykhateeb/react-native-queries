@@ -57,7 +57,7 @@ const useFakePosts = (
   const [fakePostsConfig] = useQueryConfig('jsonplaceholder', 'fakePosts');
   return useGet<FakePostsData, FakePostsError>(
     {
-      key: 'FAKE_POSTS',
+      key: ['FAKE_POSTS'],
       ...fakePostsConfig,
     },
     options
@@ -102,7 +102,7 @@ const useFakePostsPages = (
   );
   return useInfiniteGet<FakePostsPagesData, FakePostsPagesError>(
     {
-      key: 'FAKE_POSTS_PAGES',
+      key: ['FAKE_POSTS_PAGES'],
       pageParam: 1,
       pageSize: 10,
       ...fakePostsPagesConfig,

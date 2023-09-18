@@ -1,5 +1,5 @@
-import { useInfiniteQuery } from 'react-query';
-import type { UseInfiniteQueryOptions, QueryKey } from 'react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import type { UseInfiniteQueryOptions, QueryKey } from '@tanstack/react-query';
 import Axios from './Axios';
 import type { QueryConfig } from './types';
 import { parseURL } from './utils';

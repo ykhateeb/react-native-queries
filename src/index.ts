@@ -1,4 +1,4 @@
-export * from 'react-query';
+export * from '@tanstack/react-query';
 export * from './utils';
 export * from './QueriesProvider';
 export * from './useQueryConfig';

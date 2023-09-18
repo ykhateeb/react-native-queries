@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getContext } from './utils';
 import type { Config } from './types';
 
