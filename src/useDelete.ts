@@ -1,7 +1,7 @@
-import { useMutation } from 'react-query';
+import { useMutation } from '@tanstack/react-query';
 import Axios from './Axios';
 import { parseURL } from './utils';
-import type { UseMutationOptions } from 'react-query';
+import type { UseMutationOptions } from '@tanstack/react-query';
 import type { QueryConfig } from './types';
 
 export interface UseDeleteOptions<TData, TError, TVariables>
@@ -13,7 +13,7 @@ export const useDelete = <TData = void, TError = void, TVariables = void>(
   config: UseDeleteConfig,
   options?: UseDeleteOptions<TData, TError, TVariables>
 ) => {
-  const result = useMutation<TData, TError, TVariables>(
+  return useMutation<TData, TError, TVariables>(
     async (data /** path params */) => {
       const axiosInstance = Axios.getInstance(config.baseURL);
       const response = await axiosInstance.delete<TData>(
@@ -25,6 +25,4 @@ export const useDelete = <TData = void, TError = void, TVariables = void>(
     },
     options
   );
-
-  return result;
 };

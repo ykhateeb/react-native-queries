@@ -1,5 +1,5 @@
-import { useQuery } from 'react-query';
-import type { UseQueryOptions, QueryKey } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
+import type { UseQueryOptions, QueryKey } from '@tanstack/react-query';
 import Axios from './Axios';
 import type { QueryConfig } from './types';
 
@@ -14,7 +14,7 @@ export const useGet = <TData = void, TError = void>(
   config: UseGetConfig,
   options?: UseGetOptions<TData, TError>
 ) => {
-  const result = useQuery<TData, TError>(
+  return useQuery<TData, TError>(
     config.key,
     async (_params) => {
       const axiosInstance = Axios.getInstance(config.baseURL);
@@ -28,6 +28,4 @@ export const useGet = <TData = void, TError = void>(
     },
     options
   );
-
-  return result;
 };

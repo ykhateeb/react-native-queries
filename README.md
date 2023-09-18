@@ -1,5 +1,6 @@
 [useMutation]: https://tanstack.com/query/latest/docs/react/reference/useMutation
 [useQuery]: https://tanstack.com/query/latest/docs/react/reference/useQuery
+[useInfiniteQuery]: https://tanstack.com/query/latest/docs/react/reference/useInfiniteQuery
 
 # react-native-queries
 
@@ -31,6 +32,7 @@ yarn add react-native-queries
   - [config](#config)
   - [useQueryConfig](#usequeryconfig)
   - [useGet](#useget)
+  - [useInfiniteGet](#useinfiniteget)
   - [usePost](#usepost)
   - [usePut](#useput)
   - [usePatch](#usepatch)
@@ -39,18 +41,19 @@ yarn add react-native-queries
 
 ## Quick Start
 
-```javascript
+```jsx
 import React, { useEffect } from 'react';
 import {
   QueriesProvider,
+  useQueryClient,
   useQueryConfig,
   useGet,
+  useInfiniteGet,
   usePost,
   usePut,
   usePatch,
   useDelete,
   parseConfigURL,
-  useQueryClient,
 } from 'react-native-queries';
 
 /**
@@ -74,7 +77,7 @@ const useFakePosts = (options) => {
   const [fakePostsConfig] = useQueryConfig('jsonplaceholder', 'fakePosts');
   return useGet(
     {
-      key: 'FAKE_POSTS',
+      key: ['FAKE_POSTS'],
       ...fakePostsConfig,
     },
     options
@@ -93,6 +96,25 @@ const useFilteredFakePosts = (userId, options) => {
     {
       key: ['FILTERED_FAKE_POSTS', userId],
       ...parseConfigURL(filteredFakePostsConfig, { userId }),
+    },
+    options
+  );
+};
+
+/**
+ * Fake Posts Pages
+ */
+const useFakePostsPages = (options) => {
+  const [fakePostsPagesConfig] = useQueryConfig(
+    'jsonplaceholder',
+    'fakePostsPages'
+  );
+  return useInfiniteGet(
+    {
+      key: ['FAKE_POSTS_PAGES'],
+      pageParam: 1,
+      pageSize: 10,
+      ...fakePostsPagesConfig,
     },
     options
   );
@@ -159,6 +181,12 @@ const Content = () => {
 
   const filteredFakePosts = useFilteredFakePosts(1);
 
+  const fakePostsPages = useFakePostsPages({
+    onSuccess: (data) => {
+      console.log('fakePostsPagesData: ', data);
+    },
+  });
+
   useEffect(() => {
     console.log('filteredFakePostsData: ', filteredFakePosts.data);
   }, [filteredFakePosts.data]);
@@ -213,6 +241,11 @@ const Content = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    fakePostsPages.isFetchedAfterMount && fakePostsPages.fetchNextPage();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fakePostsPages.isFetchedAfterMount, fakePostsPages.fetchNextPage]);
+
   return null;
 };
 
@@ -225,6 +258,7 @@ export default function App() {
           fakePosts: 'posts',
           fakePost: 'posts/{{id}}',
           filteredFakePosts: 'posts?userId={{userId}}',
+          fakePostsPages: 'posts?_page={{pageParam}}&_limit={{pageSize}}', //pageParam(page number here) and pageSize are mandatory, must be added with same name to be able to update query to next page.
           createFakePost: 'posts',
           updateFakePost: 'posts/{{id}}',
           patchFakePost: 'posts/{{id}}',
@@ -239,23 +273,25 @@ export default function App() {
 ```
 
 <details>
-<summary><b>typescript</b></summary>
+<summary><b>Typescript</b></summary>
 
-```typescript
+```tsx
 import React, { useEffect } from 'react';
 import {
   QueriesProvider,
+  useQueryClient,
   useQueryConfig,
   useGet,
+  useInfiniteGet,
   usePost,
   usePut,
   usePatch,
   useDelete,
   parseConfigURL,
-  useQueryClient,
 } from 'react-native-queries';
 import type {
   UseGetOptions,
+  UseInfiniteGetOptions,
   UsePostOptions,
   UsePutOptions,
   UsePatchOptions,
@@ -299,7 +335,7 @@ const useFakePosts = (
   const [fakePostsConfig] = useQueryConfig('jsonplaceholder', 'fakePosts');
   return useGet<FakePostsData, FakePostsError>(
     {
-      key: 'FAKE_POSTS',
+      key: ['FAKE_POSTS'],
       ...fakePostsConfig,
     },
     options
@@ -324,6 +360,30 @@ const useFilteredFakePosts = (
     {
       key: ['FILTERED_FAKE_POSTS', userId],
       ...parseConfigURL(filteredFakePostsConfig, { userId }),
+    },
+    options
+  );
+};
+
+/**
+ * Fake Posts Pages
+ */
+type FakePostsPagesData = FakePostData[];
+interface FakePostsPagesError {}
+
+const useFakePostsPages = (
+  options?: UseInfiniteGetOptions<FakePostsPagesData, FakePostsPagesError>
+) => {
+  const [fakePostsPagesConfig] = useQueryConfig(
+    'jsonplaceholder',
+    'fakePostsPages'
+  );
+  return useInfiniteGet<FakePostsPagesData, FakePostsPagesError>(
+    {
+      key: ['FAKE_POSTS_PAGES'],
+      pageParam: 1,
+      pageSize: 10,
+      ...fakePostsPagesConfig,
     },
     options
   );
@@ -461,6 +521,12 @@ const Content = () => {
 
   const filteredFakePosts = useFilteredFakePosts(1);
 
+  const fakePostsPages = useFakePostsPages({
+    onSuccess: (data) => {
+      console.log('fakePostsPagesData: ', data);
+    },
+  });
+
   useEffect(() => {
     console.log('filteredFakePostsData: ', filteredFakePosts.data);
   }, [filteredFakePosts.data]);
@@ -515,6 +581,11 @@ const Content = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    fakePostsPages.isFetchedAfterMount && fakePostsPages.fetchNextPage();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fakePostsPages.isFetchedAfterMount, fakePostsPages.fetchNextPage]);
+
   return null;
 };
 
@@ -527,6 +598,8 @@ export default function App() {
           fakePosts: 'posts',
           fakePost: 'posts/{{id}}',
           filteredFakePosts: 'posts?userId={{userId}}',
+          //pageParam(page number here) and pageSize are mandatory to set,to be able to update query to next page.
+          fakePostsPages: 'posts?_page={{pageParam}}&_limit={{pageSize}}',
           createFakePost: 'posts',
           updateFakePost: 'posts/{{id}}',
           patchFakePost: 'posts/{{id}}',
@@ -573,7 +646,7 @@ const configStructure = {
 const config = {
   jsonplaceholder: {
     baseURL: 'https://jsonplaceholder.typicode.com',
-    //will be applied to all requests except where requestConfigAction is OVERWRITE
+    //will be applied to all queries except where requestConfigAction is OVERWRITE
     requestConfig: {
       headers: {
         sharedHeader: '...',
@@ -596,6 +669,7 @@ const config = {
     patchFakePost: {
       url: 'posts/{{id}}',
       //will be merged with baseURL requestConfig, since requestConfigAction default is MERGE
+      //ex: requestConfig: { headers: { specificHeader2: '...' , sharedHeader: '...'} }
       requestConfig: {
         headers: {
           specificHeader2: '...',
@@ -616,7 +690,7 @@ const App = () => {
 
 <details>
   <summary>
-    <b>typescript</b>
+    <b>Typescript</b>
   </summary>
 
 ```typescript
@@ -642,7 +716,7 @@ interface Config {
 
 `- baseURLValue:` Base server URL that will be prepended to every `URLValue`.
 
-`- requestConfig:` [AxiosRequestConfig](https://axios-http.com/docs/req_config) to use with every query.
+`- requestConfig:` [AxiosRequestConfig](https://axios-http.com/docs/req_config) to use with every query, except `baseURL`, `url` and `method`.
 
 `- URLKey:` Name of URL(endpoint).
 
@@ -771,7 +845,7 @@ A wrapper around [useQuery] hook.
 import { useQueryConfig, useGet, parseConfigURL } from 'react-native-queries';
 
 const getConfig = {
-  key: '...',
+  key: '...', //mandatory
   baseURL: '...',
   url: '...',
   requestConfig: '...',
@@ -801,13 +875,13 @@ const useFakePost = (id, options) => {
 
 const { data, error, ...rest } = useFakePost(1, {
   onSuccess: (data) => {
-    console.log('fakePost: ', data);
+    console.log('fakePostData: ', data);
   },
 });
 ```
 
 <details>
-<summary><b>typescript</b></summary>
+<summary><b>Typescript</b></summary>
 
 ```typescript
 import { useQueryConfig, useGet, parseConfigURL } from 'react-native-queries';
@@ -817,7 +891,7 @@ interface GetData {}
 interface GetError {}
 
 const getConfig: UseGetConfig = {
-  key: '...',
+  key: '...', //mandatory
   baseURL: '...',
   url: '...',
   requestConfig: '...',
@@ -858,7 +932,7 @@ const useFakePost = (
 
 const { data, error, ...rest } = useFakePost(1, {
   onSuccess: (data) => {
-    console.log('fakePost: ', data);
+    console.log('fakePostData: ', data);
   },
 });
 ```
@@ -867,10 +941,164 @@ const { data, error, ...rest } = useFakePost(1, {
 
 <br/>
 
-`- getOptions:` [useQuery](https://tanstack.com/query/latest/docs/react/reference/useQuery) options
+`- getOptions:` [useQuery] options,
 expect `queryKey`(mapped to `key` in `getConfig`) and `queryFn`.
 
-`- getReturns:` [useQuery](https://tanstack.com/query/latest/docs/react/reference/useGet) returns.
+`- getReturns:` [useQuery] returns.
+
+---
+
+### `useInfiniteGet`
+
+A wrapper around [useInfiniteQuery] hook.
+
+```javascript
+import { useQueryConfig, useInfiniteGet } from 'react-native-queries';
+
+const infiniteGetConfig = {
+  key: '...', // mandatory
+  /**
+   * pageSize and pageParam are mandatory, they will be mapped to it's place in url
+   * ex: 'posts?_page={{pageParam}}&_limit={{pageSize}}'
+   */
+  pageSize: '...',
+  pageParam: '...',
+  baseURL: '...',
+  url: '...',
+  requestConfig: '...',
+};
+
+const infiniteGetOptions = {
+  onSuccess: (data) => {},
+  onError: (error) => {},
+  getNextPageParam: (lastPage, allPages) => {},
+  getPreviousPageParam: (firstPage, allPages) => {},
+  //...
+};
+
+const infiniteGetReturns = useInfiniteGet(
+  infiniteGetConfig,
+  infiniteGetOptions
+);
+
+fakePostsPages.fetchNextPage();
+// OR manually specify pageParam
+fakePostsPages.fetchNextPage({ pageParam: 2 });
+
+// Note: passing getNextPageParam will override default implementation, which is based on increasing pageParam by 1 on every fetchNextPage call till finish all pages, in that case you need to provide your own implementation
+
+/**
+ * Example:
+ */
+const useFakePostsPages = (options) => {
+  const [fakePostsPagesConfig] = useQueryConfig(
+    'jsonplaceholder',
+    'fakePostsPages'
+  );
+  return useInfiniteGet(
+    {
+      key: ['FAKE_POSTS_PAGES'],
+      pageParam: 1,
+      pageSize: 10,
+      ...fakePostsPagesConfig,
+    },
+    options
+  );
+};
+
+const { data, error, fetchNextPage, ...rest } = useFakePostsPages({
+  onSuccess: (data) => {
+    console.log('fakePostsPagesData: ', data);
+  },
+});
+
+fetchNextPage();
+```
+
+<details>
+<summary><b>Typescript</b></summary>
+
+```typescript
+import { useQueryConfig, useInfiniteGet } from 'react-native-queries';
+import type {
+  UseInfiniteGetConfig,
+  UseInfiniteGetOptions,
+} from 'react-native-queries';
+
+interface InfiniteGetData {}
+interface InfiniteGetError {}
+
+const infiniteGetConfig: UseInfiniteGetConfig = {
+  key: '...', // mandatory
+  /**
+   * pageSize and pageParam are mandatory, they will be mapped to it's place in url
+   * ex: 'posts?_page={{pageParam}}&_limit={{pageSize}}'
+   */
+  pageSize: '...',
+  pageParam: '...',
+  baseURL: '...',
+  url: '...',
+  requestConfig: '...',
+};
+
+const infiniteGetOptions: UseInfiniteGetOptions<
+  InfiniteGetData,
+  InfiniteGetError
+> = {
+  onSuccess: (data) => {},
+  onError: (error) => {},
+  getNextPageParam: (lastPage, allPages) => {},
+  getPreviousPageParam: (firstPage, allPages) => {},
+  //...
+};
+
+const infiniteGetReturns = useInfiniteGet<InfiniteGetData, InfiniteGetError>(
+  infiniteGetConfig,
+  infiniteGetOptions
+);
+
+fakePostsPages.fetchNextPage();
+// OR manually specify pageParam
+fakePostsPages.fetchNextPage({ pageParam: 2 });
+
+// Note: passing getNextPageParam will override default implementation, which is based on increasing pageParam by 1 on every fetchNextPage call till finish all pages, in that case you need to provide your own implementation
+
+/**
+ * Example:
+ */
+const useFakePostsPages = (options) => {
+  const [fakePostsPagesConfig] = useQueryConfig(
+    'jsonplaceholder',
+    'fakePostsPages'
+  );
+  return useInfiniteGet(
+    {
+      key: ['FAKE_POSTS_PAGES'],
+      pageParam: 1,
+      pageSize: 10,
+      ...fakePostsPagesConfig,
+    },
+    options
+  );
+};
+
+const { data, error, fetchNextPage, ...rest } = useFakePostsPages({
+  onSuccess: (data) => {
+    console.log('fakePostsPagesData: ', data);
+  },
+});
+
+fetchNextPage();
+```
+
+</details>
+
+<br/>
+
+`- infiniteGetOptions:` [useInfiniteQuery] options,
+expect `queryKey`(mapped to `key` in `infiniteGetConfig`) and `queryFn`.
+
+`- infiniteGetReturns:` [useInfiniteQuery] returns.
 
 ---
 
@@ -899,13 +1127,16 @@ const postReturns = usePost(postConfig, postOptions);
  * Example:
  */
 const useCreateFakePost = (options) => {
-  const [createPostConfig] = useQueryConfig('jsonplaceholder', 'createPost');
+  const [createPostConfig] = useQueryConfig(
+    'jsonplaceholder',
+    'createFakePost'
+  );
   return usePost(createPostConfig, options);
 };
 
 const { data, error, mutate, ...rest } = useCreateFakePost({
   onSuccess: (data) => {
-    console.log('createFakePost: ', data);
+    console.log('createFakePostData: ', data);
   },
 });
 
@@ -913,7 +1144,7 @@ mutate({ title: 'foo', body: 'bar', userId: 1 });
 ```
 
 <details>
-<summary><b>typescript</b></summary>
+<summary><b>Typescript</b></summary>
 
 ```typescript
 import { useQueryConfig, usePost } from 'react-native-queries';
@@ -976,7 +1207,7 @@ const useCreateFakePost = (
 
 const { data, error, mutate, ...rest } = useCreateFakePost({
   onSuccess: (data) => {
-    console.log('createFakePost: ', data);
+    console.log('createFakePostData: ', data);
   },
 });
 
@@ -1027,7 +1258,7 @@ const useUpdateFakePost = (id, options) => {
 
 const { data, error, mutate, ...rest } = useUpdateFakePost(1, {
   onSuccess: (data) => {
-    console.log('updateFakePost: ', data);
+    console.log('updateFakePostData: ', data);
   },
 });
 
@@ -1035,7 +1266,7 @@ mutate({ id: 1, title: 'foo', body: 'bar', userId: 1 });
 ```
 
 <details>
-<summary><b>typescript</b></summary>
+<summary><b>Typescript</b></summary>
 
 ```typescript
 import { useQueryConfig, usePut } from 'react-native-queries';
@@ -1143,7 +1374,7 @@ const usePatchFakePost = (id, options) => {
 
 const { data, error, mutate, ...rest } = usePatchFakePost(1, {
   onSuccess: (data) => {
-    console.log('patchFakePost: ', data);
+    console.log('patchFakePostData: ', data);
   },
 });
 
@@ -1151,7 +1382,7 @@ mutate({ title: 'foo' });
 ```
 
 <details>
-<summary><b>typescript</b></summary>
+<summary><b>Typescript</b></summary>
 
 ```typescript
 import { useQueryConfig, usePatch } from 'react-native-queries';
@@ -1213,7 +1444,7 @@ const usePatchFakePost = (
 
 const { data, error, mutate, ...rest } = usePatchFakePost(1, {
   onSuccess: (data) => {
-    console.log('patchFakePost: ', data);
+    console.log('patchFakePostData: ', data);
   },
 });
 
@@ -1265,7 +1496,7 @@ const useDeleteFakePost = (options) => {
 
 const { data, error, mutate, ...rest } = useDeleteFakePost({
   onSuccess: (data) => {
-    console.log('deleteFakePost: ', data);
+    console.log('deleteFakePostData: ', data);
   },
 });
 
@@ -1284,7 +1515,7 @@ const useDeleteFakePost = (id, options) => {
 
 const { data, error, mutate, ...rest } = useDeleteFakePost(1, {
   onSuccess: (data) => {
-    console.log('deleteFakePost: ', data);
+    console.log('deleteFakePostData: ', data);
   },
 });
 
@@ -1292,7 +1523,7 @@ mutate();
 ```
 
 <details>
-<summary><b>typescript</b></summary>
+<summary><b>Typescript</b></summary>
 
 ```typescript
 import { useQueryConfig, useDelete } from 'react-native-queries';
@@ -1353,7 +1584,7 @@ const useDeleteFakePost = (
 
 const { data, error, mutate, ...rest } = useDeleteFakePost({
   onSuccess: (data) => {
-    console.log('deleteFakePost: ', data);
+    console.log('deleteFakePostData: ', data);
   },
 });
 
@@ -1387,7 +1618,7 @@ const useDeleteFakePost = (
 
 const { data, error, mutate, ...rest } = useDeleteFakePost(1, {
   onSuccess: (data) => {
-    console.log('deleteFakePost: ', data);
+    console.log('deleteFakePostData: ', data);
   },
 });
 
