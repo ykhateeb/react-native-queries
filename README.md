@@ -39,6 +39,8 @@ yarn add react-native-queries
   - [useDelete](#usedelete)
   - [parseConfigURL](#parseconfigurl)
 
+---
+
 ## Quick Start
 
 ```jsx
@@ -614,6 +616,8 @@ export default function App() {
 ```
 
 </details>
+
+---
 
 # Explanations
 
