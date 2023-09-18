@@ -1,17 +1,19 @@
 import React, { useEffect } from 'react';
 import {
   QueriesProvider,
+  useQueryClient,
   useQueryConfig,
   useGet,
+  useInfiniteGet,
   usePost,
   usePut,
   usePatch,
   useDelete,
   parseConfigURL,
-  useQueryClient,
 } from 'react-native-queries';
 import type {
   UseGetOptions,
+  UseInfiniteGetOptions,
   UsePostOptions,
   UsePutOptions,
   UsePatchOptions,
@@ -80,6 +82,30 @@ const useFilteredFakePosts = (
     {
       key: ['FILTERED_FAKE_POSTS', userId],
       ...parseConfigURL(filteredFakePostsConfig, { userId }),
+    },
+    options
+  );
+};
+
+/**
+ * Fake Posts Pages
+ */
+type FakePostsPagesData = FakePostData[];
+interface FakePostsPagesError {}
+
+const useFakePostsPages = (
+  options?: UseInfiniteGetOptions<FakePostsPagesData, FakePostsPagesError>
+) => {
+  const [fakePostsPagesConfig] = useQueryConfig(
+    'jsonplaceholder',
+    'fakePostsPages'
+  );
+  return useInfiniteGet<FakePostsPagesData, FakePostsPagesError>(
+    {
+      key: 'FAKE_POSTS_PAGES',
+      pageParam: 1,
+      pageSize: 10,
+      ...fakePostsPagesConfig,
     },
     options
   );
@@ -217,6 +243,12 @@ const Content = () => {
 
   const filteredFakePosts = useFilteredFakePosts(1);
 
+  const fakePostsPages = useFakePostsPages({
+    onSuccess: (data) => {
+      console.log('fakePostsPagesData: ', data);
+    },
+  });
+
   useEffect(() => {
     console.log('filteredFakePostsData: ', filteredFakePosts.data);
   }, [filteredFakePosts.data]);
@@ -271,6 +303,11 @@ const Content = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    fakePostsPages.isFetchedAfterMount && fakePostsPages.fetchNextPage();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fakePostsPages.isFetchedAfterMount, fakePostsPages.fetchNextPage]);
+
   return null;
 };
 
@@ -283,6 +320,8 @@ export default function App() {
           fakePosts: 'posts',
           fakePost: 'posts/{{id}}',
           filteredFakePosts: 'posts?userId={{userId}}',
+          //pageParam(page number here) and pageSize are mandatory to set,to be able to update query to next page.
+          fakePostsPages: 'posts?_page={{pageParam}}&_limit={{pageSize}}',
           createFakePost: 'posts',
           updateFakePost: 'posts/{{id}}',
           patchFakePost: 'posts/{{id}}',

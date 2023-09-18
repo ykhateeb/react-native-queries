@@ -3,6 +3,7 @@ export * from './utils';
 export * from './QueriesProvider';
 export * from './useQueryConfig';
 export * from './useGet';
+export * from './useInfiniteGet';
 export * from './usePost';
 export * from './usePut';
 export * from './usePatch';

@@ -12,7 +12,7 @@ export const usePut = <TData = void, TError = void, TVariables = void>(
   config: UsePutConfig,
   options?: UsePutOptions<TData, TError, TVariables>
 ) => {
-  const result = useMutation<TData, TError, TVariables>(async (data) => {
+  return useMutation<TData, TError, TVariables>(async (data) => {
     const axiosInstance = Axios.getInstance(config.baseURL);
 
     const response = await axiosInstance.put<TData>(
@@ -23,6 +23,4 @@ export const usePut = <TData = void, TError = void, TVariables = void>(
 
     return response.data;
   }, options);
-
-  return result;
 };

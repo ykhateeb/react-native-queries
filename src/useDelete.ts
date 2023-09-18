@@ -13,7 +13,7 @@ export const useDelete = <TData = void, TError = void, TVariables = void>(
   config: UseDeleteConfig,
   options?: UseDeleteOptions<TData, TError, TVariables>
 ) => {
-  const result = useMutation<TData, TError, TVariables>(
+  return useMutation<TData, TError, TVariables>(
     async (data /** path params */) => {
       const axiosInstance = Axios.getInstance(config.baseURL);
       const response = await axiosInstance.delete<TData>(
@@ -25,6 +25,4 @@ export const useDelete = <TData = void, TError = void, TVariables = void>(
     },
     options
   );
-
-  return result;
 };
